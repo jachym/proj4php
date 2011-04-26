@@ -33,43 +33,43 @@ ALGORITHM REFERENCES
 /* Variables common to all subroutines in this code file
   -----------------------------------------------------*/
 
-class Proj4phpProjEqdc
+class Proj4phpProjEqdc extends Proj4phpProj 
 {
   /* Initialize the Equidistant Conic projection
   ------------------------------------------*/
-  public function init()
+  function init()
   {
-    /* Place parameters in static storage for common use
+    /* Place parameters in storage for common use
       -------------------------------------------------*/
 
     if(!$this->mode) $this->mode=0;//chosen default mode
     $this->temp = $this->b / $this->a;
     $this->es = 1.0 - pow($this->temp,2);
     $this->e = sqrt($this->es);
-    $this->e0 = Proj4php::$common->e0fn($this->es);
-    $this->e1 = Proj4php::$common->e1fn($this->es);
-    $this->e2 = Proj4php::$common->e2fn($this->es);
-    $this->e3 = Proj4php::$common->e3fn($this->es);
+    $this->e0 = $this->proj4php->common->e0fn($this->es);
+    $this->e1 = $this->proj4php->common->e1fn($this->es);
+    $this->e2 = $this->proj4php->common->e2fn($this->es);
+    $this->e3 = $this->proj4php->common->e3fn($this->es);
 
     $this->sinphi=sin($this->lat1);
     $this->cosphi=cos($this->lat1);
 
-    $this->ms1 = Proj4php::$common->msfnz($this->e,$this->sinphi,$this->cosphi);
-    $this->ml1 = Proj4php::$common->mlfn($this->e0, $this->e1, $this->e2,$this->e3, $this->lat1);
+    $this->ms1 = $this->proj4php->common->msfnz($this->e,$this->sinphi,$this->cosphi);
+    $this->ml1 = $this->proj4php->common->mlfn($this->e0, $this->e1, $this->e2,$this->e3, $this->lat1);
 
     /* format B
     ---------*/
     if ($this->mode != 0) {
-      if (abs($this->lat1 + $this->lat2) < Proj4php::$common->EPSLN) {
+      if (abs($this->lat1 + $this->lat2) < $this->proj4php->common->EPSLN) {
             Proj4php::reportError("eqdc:Init:EqualLatitudes");
             //return(81);
        }
        $this->sinphi=sin($this->lat2);
        $this->cosphi=cos($this->lat2);   
 
-       $this->ms2 = Proj4php::$common->msfnz($this->e,$this->sinphi,$this->cosphi);
-       $this->ml2 = Proj4php::$common->mlfn($this->e0, $this->e1, $this->e2, $this->e3, $this->lat2);
-       if (abs($this->lat1 - $this->lat2) >= Proj4php::$common->EPSLN) {
+       $this->ms2 = $this->proj4php->common->msfnz($this->e,$this->sinphi,$this->cosphi);
+       $this->ml2 = $this->proj4php->common->mlfn($this->e0, $this->e1, $this->e2, $this->e3, $this->lat2);
+       if (abs($this->lat1 - $this->lat2) >= $this->proj4php->common->EPSLN) {
          $this->ns = ($this->ms1 - $this->ms2) / ($this->ml2 - $this->ml1);
        } else {
           $this->ns = $this->sinphi;
@@ -78,22 +78,22 @@ class Proj4phpProjEqdc
       $this->ns = $this->sinphi;
     }
     $this->g = $this->ml1 + $this->ms1/$this->ns;
-    $this->ml0 = Proj4php::$common->mlfn($this->e0, $this->e1,$this-> e2, $this->e3, $this->lat0);
+    $this->ml0 = $this->proj4php->common->mlfn($this->e0, $this->e1,$this-> e2, $this->e3, $this->lat0);
     $this->rh = $this->a * ($this->g - $this->ml0);
   }
 
 
 /* Equidistant Conic forward equations--mapping lat,long to x,y
   -----------------------------------------------------------*/
-  public function forward($p) {
+  function forward($p) {
     $lon=$p->x;
     $lat=$p->y;
 
     /* Forward equations
       -----------------*/
-    $ml = Proj4php::$common->mlfn($this->e0, $this->e1, $this->e2, $this->e3, $lat);
+    $ml = $this->proj4php->common->mlfn($this->e0, $this->e1, $this->e2, $this->e3, $lat);
     $rh1 = $this->a * ($this->g - $ml);
-    $theta = $this->ns * Proj4php::$common->adjust_lon($lon - $this->long0);
+    $theta = $this->ns * $this->proj4php->common->adjust_lon($lon - $this->long0);
 
     $x = $this->x0  + $rh1 * sin($theta);
     $y = $this->y0 + $this->rh - $rh1 * cos($theta);
@@ -104,7 +104,7 @@ class Proj4phpProjEqdc
 
 /* Inverse equations
   -----------------*/
-  public function inverse($p) {
+  function inverse($p) {
     $p->x -= $this->x0;
     $p->y  = $this->rh - $p->y + $this->y0;
     $con; $rh1;
@@ -119,7 +119,7 @@ class Proj4phpProjEqdc
     if ($rh1 != 0.0) $theta = atan2($con *$p->x, $con *$p->y);
     $ml = $this->g - $rh1 /$this->a;
     $lat = $this->phi3z($ml,$this->e0,$this->e1,$this->e2,$this->e3);
-    $lon = Proj4php::$common->adjust_lon($this->long0 + $theta / $this->ns);
+    $lon = $this->proj4php->common->adjust_lon($this->long0 + $theta / $this->ns);
 
      $p->x=$lon;
      $p->y=$lat;  
@@ -129,7 +129,7 @@ class Proj4phpProjEqdc
 /* Function to compute latitude, phi3, for the inverse of the Equidistant
    Conic projection.
 -----------------------------------------------------------------*/
-  public function phi3z($ml,$e0,$e1,$e2,$e3) {
+  function phi3z($ml,$e0,$e1,$e2,$e3) {
     $phi;
     $dphi;
 
@@ -148,4 +148,4 @@ class Proj4phpProjEqdc
     
 }
 
-Proj4php::$proj['eqdc'] = new Proj4phpProjEqdc();
+$this->proj['eqdc'] = new Proj4phpProjEqdc('',$this);

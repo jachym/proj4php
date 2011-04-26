@@ -23,9 +23,9 @@ ALGORITHM REFERENCES
 
 *******************************************************************************/
 
-class Proj4phpProjSomerc  {
+class Proj4phpProjSomerc   extends Proj4phpProj {
 
-  public function init() {
+  function init() {
     $phy0 = $this->lat0;
     $this->lambda0 = $this->long0;
     $sinPhy0 = sin($phy0);
@@ -47,7 +47,7 @@ class Proj4phpProjSomerc  {
   }
 
 
-  public function forward($p) {
+  function forward($p) {
     $Sa1 = log(tan($PI / 4.0 - $p->y / 2.0));
     $Sa2 = $this->e / 2.0
             * log((1 + $this->e * sin($p->y))
@@ -75,7 +75,7 @@ class Proj4phpProjSomerc  {
     return $p;
   }
 
-  public function inverse($p) {
+  function inverse($p) {
     $Y = $p->x - $this->x0;
     $X = $p->y - $this->y0;
 
@@ -122,4 +122,4 @@ class Proj4phpProjSomerc  {
 
 
 
-Proj4php::$proj['somerc'] = new Proj4phpProjSomerc();
+$this->proj['somerc'] = new Proj4phpProjSomerc('',$this);

@@ -9,27 +9,27 @@
  
 // Initialize the Stereographic projection
 
-class Proj4phpProjStere {
-  public function ssfn_($phit, $sinphi, $eccen) {
+class Proj4phpProjStere  extends Proj4phpProj {
+  function ssfn_($phit, $sinphi, $eccen) {
   	$sinphi *= $eccen;
-  	return (tan (.5 * (Proj4php::$common->HALF_PI + $phit)) * pow((1. - $sinphi) / (1. + $sinphi), .5 * $eccen));
+  	return (tan (.5 * ($this->proj4php->common->HALF_PI + $phit)) * pow((1. - $sinphi) / (1. + $sinphi), .5 * $eccen));
   }
   
-  protected $TOL=	1.e-8;
-  protected $NITER=	8;
-  protected $CONV=	1.e-10;
-  protected $S_POLE=	0;
-  protected $N_POLE=	1;
-  protected $OBLIQ=	2;
-  protected $EQUIT=	3;
+  $TOL=	1.e-8;
+  $NITER=	8;
+  $CONV=	1.e-10;
+  $S_POLE=	0;
+  $N_POLE=	1;
+  $OBLIQ=	2;
+  $EQUIT=	3;
 
-  public function init() {
-  	$this->phits = $this->lat_ts ? $this->lat_ts : Proj4php::$common->HALF_PI;
+  function init() {
+  	$this->phits = $this->lat_ts ? $this->lat_ts : $this->proj4php->common->HALF_PI;
     $t = abs($this->lat0);
-  	if ((abs($t) - Proj4php::$common->HALF_PI) < Proj4php::$common->EPSLN) {
+  	if ((abs($t) - $this->proj4php->common->HALF_PI) < $this->proj4php->common->EPSLN) {
   		$this->mode = $this->lat0 < 0. ? $this->S_POLE : $this->N_POLE;
   	} else {
-  		$this->mode = $t > Proj4php::$common->EPSLN ? $this->OBLIQ : $this->EQUIT;
+  		$this->mode = $t > $this->proj4php->common->EPSLN ? $this->OBLIQ : $this->EQUIT;
     }
   	$this->phits = abs($this->phits);
   	if ($this->es) {
@@ -38,11 +38,11 @@ class Proj4phpProjStere {
   		switch ($this->mode) {
   		case $this->N_POLE:
   		case $this->S_POLE:
-  			if (abs($this->phits - Proj4php::$common->HALF_PI) < Proj4php::$common->EPSLN) {
+  			if (abs($this->phits - $this->proj4php->common->HALF_PI) < $this->proj4php->common->EPSLN) {
   				$this->akm1 = 2. * $this->k0 / sqrt(pow(1+$this->e,1+$this->e)*pow(1-$this->e,1-$this->e));
   			} else {
           $t = sin($this->phits);
-  				$this->akm1 = cos($this->phits) / Proj4php::$common.tsfnz($this->e, $this->phits, $t);
+  				$this->akm1 = cos($this->phits) / $this->proj4php->common.tsfnz($this->e, $this->phits, $t);
   				$t *= $this->e;
   				$this->akm1 /= sqrt(1. - $t * $t);
   			}
@@ -52,7 +52,7 @@ class Proj4phpProjStere {
   			break;
   		case $this->OBLIQ:
   			$t = sin($this->lat0);
-  			$X = 2. * atan($this->ssfn_($this->lat0, $t, $this->e)) - Proj4php::$common->HALF_PI;
+  			$X = 2. * atan($this->ssfn_($this->lat0, $t, $this->e)) - $this->proj4php->common->HALF_PI;
   			$t *= $this->e;
   			$this->akm1 = 2. * $this->k0 * cos($this->lat0) / sqrt(1. - $t * $t);
   			$this->sinX1 = sin($X);
@@ -69,8 +69,8 @@ class Proj4phpProjStere {
   			break;
   		case $this->S_POLE:
   		case $this->N_POLE:
-  			$this->akm1 = abs($this->phits - Proj4php::$common->HALF_PI) >= Proj4php::$common->EPSLN ?
-  			   cos($this->phits) / tan(Proj4php::$common->FORTPI - .5 * $this->phits) :
+  			$this->akm1 = abs($this->phits - $this->proj4php->common->HALF_PI) >= $this->proj4php->common->EPSLN ?
+  			   cos($this->phits) / tan($this->proj4php->common->FORTPI - .5 * $this->phits) :
   			   2. * $this->k0 ;
   			break;
   		}
@@ -78,9 +78,9 @@ class Proj4phpProjStere {
   } 
 
 // Stereographic forward equations--mapping lat,long to x,y
-  public function forward($p) {
+  function forward($p) {
     $lon = $p->x;
-    $lon = Proj4php::$common->adjust_lon($lon - $this->long0);
+    $lon = $this->proj4php->common->adjust_lon($lon - $this->long0);
     $lat = $p->y;
     $x;$y;
     
@@ -94,7 +94,7 @@ class Proj4phpProjStere {
     	switch ($this->mode) {
     	case $this->EQUIT:
     		$y = 1. + $cosphi * $coslam;
-    		if (y <= Proj4php::$common->EPSLN) {
+    		if (y <= $this->proj4php->common->EPSLN) {
           $F_ERROR; // don't know what to do.
         }
         $y = $this->akm1 / $y;
@@ -103,7 +103,7 @@ class Proj4phpProjStere {
     		break;
     	case $this->OBLIQ:
     		$y = 1. + $this->sinph0 * $sinphi + $this->cosph0 * $cosphi * $coslam;
-    		if ($y <= Proj4php::$common->EPSLN) {
+    		if ($y <= $this->proj4php->common->EPSLN) {
           F_ERROR;
         }
         $y = $this->akm1 / $y;
@@ -115,10 +115,10 @@ class Proj4phpProjStere {
     		$lat = -$lat;
         //Note  no break here so it conitnues through S_POLE
     	case $this->S_POLE:
-    		if (abs($lat - Proj4php::$common->HALF_PI) < $this->TOL) {
+    		if (abs($lat - $this->proj4php->common->HALF_PI) < $this->TOL) {
           F_ERROR;
         }
-        $y = $this->akm1 * tan(Proj4php::$common->FORTPI + .5 * $lat);
+        $y = $this->akm1 * tan($this->proj4php->common->FORTPI + .5 * $lat);
     		$x = $sinlam * $y;
     		$y *= $coslam;
     		break;
@@ -129,7 +129,7 @@ class Proj4phpProjStere {
     	$sinphi = sin($lat);
     	if ($this->mode == $this->OBLIQ || $this->mode == $this->EQUIT) {
         $X = 2. * atan($this->ssfn_($lat, $sinphi, $this->e));
-    		sinX = sin($X - Proj4php::$common->HALF_PI);
+    		sinX = sin($X - $this->proj4php->common->HALF_PI);
     		cosX = cos($X);
     	}
     	switch ($this->mode) {
@@ -148,7 +148,7 @@ class Proj4phpProjStere {
     		$coslam = - $coslam;
     		$sinphi = -$sinphi;
     	case $this->N_POLE:
-    		$x = $this->akm1 * Proj4php::$common->tsfnz($this->e, $lat, $sinphi);
+    		$x = $this->akm1 * $this->proj4php->common->tsfnz($this->e, $lat, $sinphi);
     		$y = - $x * $coslam;
     		break;
     	}
@@ -161,7 +161,7 @@ class Proj4phpProjStere {
 
 
 //* Stereographic inverse equations--mapping x,y to lat/long
-  public function inverse($p) {
+  function inverse($p) {
     $x = ($p->x - $this->x0)/$this->a;   /* descale and de-offset */
     $y = ($p->y - $this->y0)/$this->a;
     $lon; $lat;
@@ -179,7 +179,7 @@ class Proj4phpProjStere {
     	$lon = 0.;
     	switch ($this->mode) {
     	case $this->EQUIT:
-    		if (abs($rh) <= Proj4php::$common->EPSLN) {
+    		if (abs($rh) <= $this->proj4php->common->EPSLN) {
     			$lat = 0.;
     		} else {
     			$lat = asin($y * $sinc / $rh);
@@ -187,7 +187,7 @@ class Proj4phpProjStere {
     		if ($cosc != 0. || $x != 0.) $lon = atan2($x * $sinc, $cosc * $rh);
     		break;
     	case $this->OBLIQ:
-    		if (abs($rh) <= Proj4php::$common->EPSLN) {
+    		if (abs($rh) <= $this->proj4php->common->EPSLN) {
     			$lat = $this->phi0;
     		} else {
     			$lat = asin($cosc * $sinph0 + $y * $sinc * $cosph0 / $rh);
@@ -200,7 +200,7 @@ class Proj4phpProjStere {
     	case $this->N_POLE:
     		$y = -$y;
     	case $this->S_POLE:
-    		if (abs($rh) <= Proj4php::$common->EPSLN) {
+    		if (abs($rh) <= $this->proj4php->common->EPSLN) {
     			$lat = $this->phi0;
     		} else {
     			$lat = asin($this->mode == $this->S_POLE ? -$cosc : $cosc);
@@ -208,7 +208,7 @@ class Proj4phpProjStere {
     		$lon = ($x == 0. && $y == 0.) ? 0. : atan2($x, $y);
     		break;
     	}
-        $p->x = Proj4php::$common->adjust_lon($lon + $this->long0);
+        $p->x = $this->proj4php->common->adjust_lon($lon + $this->long0);
         $p->y = $lat;
     } else {
     	$rho = sqrt($x*$x + $y*$y);
@@ -224,18 +224,18 @@ class Proj4phpProjStere {
     		  $phi_l = asin($cosphi * $this->sinX1 + ($y * $sinphi * $this->cosX1 / $rho));
         }
 
-    		$tp = tan(.5 * (Proj4php::$common->HALF_PI + $phi_l));
+    		$tp = tan(.5 * ($this->proj4php->common->HALF_PI + $phi_l));
     		$x *= $sinphi;
     		$y = $rho * $this->cosX1 * $cosphi - $y * $this->sinX1* $sinphi;
-    		$pi2 = Proj4php::$common->HALF_PI;
+    		$pi2 = $this->proj4php->common->HALF_PI;
     		$halfe = .5 * $this->e;
     		break;
     	case $this->N_POLE:
     		$y = -$y;
     	case $this->S_POLE:
         $tp = - $rho / $this->akm1;
-    		$phi_l = Proj4php::$common->HALF_PI - 2. * atan($tp);
-    		$pi2 = -Proj4php::$common->HALF_PI;
+    		$phi_l = $this->proj4php->common->HALF_PI - 2. * atan($tp);
+    		$pi2 = -$this->proj4php->common->HALF_PI;
     		$halfe = -.5 * $this->e;
     		break;
     	}
@@ -245,7 +245,7 @@ class Proj4phpProjStere {
     		if (abs(phi_l - lat) < $this->CONV) {
     			if ($this->mode == $this->S_POLE) $lat = -$lat;
     			$lon = ($x == 0. && $y == 0.) ? 0. : atan2($x, $y);
-          $p->x = Proj4php::$common->adjust_lon($lon + $this->long0);
+          $p->x = $this->proj4php->common->adjust_lon($lon + $this->long0);
           $p->y = $lat;
     			return $p;
     		}
@@ -255,4 +255,4 @@ class Proj4phpProjStere {
 }
 
 
-Proj4php::$proj['stere'] = new Proj4phpProjStere();
+$this->proj['stere'] = new Proj4phpProjStere('',$this);

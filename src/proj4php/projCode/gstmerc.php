@@ -8,8 +8,8 @@
  */
  
  
- class Proj4phpProjGstmerc  {
-  public function init() {
+ class Proj4phpProjGstmerc  extends Proj4phpProj  {
+  function init() {
 
     // array of:  a, b, lon0, lat0, k0, x0, y0
       $temp= $this->b / $this->a;
@@ -19,7 +19,7 @@
       $sinz= sin($this->lat0);
       $pc= asin($sinz/$this->rs);
       $sinzpc= sin($pc);
-      $this->cp= Proj4php::$common->latiso(0.0,$pc,$sinzpc)-$this->rs*Proj4php::$common->latiso($this->e,$this->lat0,$sinz);
+      $this->cp= $this->proj4php->common->latiso(0.0,$pc,$sinzpc)-$this->rs*$this->proj4php->common->latiso($this->e,$this->lat0,$sinz);
       $this->n2= $this->k0*$this->a*sqrt(1.0-$this->e*$this->e)/(1.0-$this->e*$this->e*$sinz*$sinz);
       $this->xs= $this->x0;
       $this->ys= $this->y0-$this->n2*$pc;
@@ -30,32 +30,32 @@
 
     // forward equations--mapping lat,long to x,y
     // -----------------------------------------------------------------
-    public function forward($p) {
+    function forward($p) {
 
       $lon= $p->x;
       $lat= $p->y;
 
       $L= $this->rs*($lon-$this->lc);
-      $Ls= $this->cp+($this->rs*Proj4php::$common->latiso($this->e,$lat,sin($lat)));
-      $lat1= asin(sin($L)/Proj4php::$common.cosh($Ls));
-      $Ls1= Proj4php::$common.latiso(0.0,$lat1,sin($lat1));
+      $Ls= $this->cp+($this->rs*$this->proj4php->common->latiso($this->e,$lat,sin($lat)));
+      $lat1= asin(sin($L)/$this->proj4php->common.cosh($Ls));
+      $Ls1= $this->proj4php->common.latiso(0.0,$lat1,sin($lat1));
       $p->x= $this->xs+($this->n2*$Ls1);
-      $p->y= $this->ys+($this->n2*atan(Proj4php::$common->sinh($Ls)/cos($L)));
+      $p->y= $this->ys+($this->n2*atan($this->proj4php->common->sinh($Ls)/cos($L)));
       return $p;
     }
 
   // inverse equations--mapping x,y to lat/long
   // -----------------------------------------------------------------
-  public function inverse($p) {
+  function inverse($p) {
 
     $x= $p->x;
     $y= $p->y;
 
-    $L= atan(Proj4php::$common.sinh(($x-$this->xs)/$this->n2)/cos(($y-$this->ys)/$this->n2));
-    $lat1= asin(sin(($y-$this->ys)/$this->n2)/Proj4php::$common.cosh(($x-$this->xs)/$this->n2));
-    $LC= Proj4php::$common.latiso(0.0,$lat1,sin($lat1));
+    $L= atan($this->proj4php->common.sinh(($x-$this->xs)/$this->n2)/cos(($y-$this->ys)/$this->n2));
+    $lat1= asin(sin(($y-$this->ys)/$this->n2)/$this->proj4php->common.cosh(($x-$this->xs)/$this->n2));
+    $LC= $this->proj4php->common.latiso(0.0,$lat1,sin($lat1));
     $p->x= $this->lc+$L/$this->rs;
-    $p->y= Proj4php::$common.invlatiso($this->e,($LC-$this->cp)/$this->rs);
+    $p->y= $this->proj4php->common.invlatiso($this->e,($LC-$this->cp)/$this->rs);
     return $p;
   }
 
@@ -63,4 +63,4 @@
 
 
 
-Proj4php::$proj['gstmerc'] = new Proj4phpProjGestmerc();
+$this->proj['gstmerc'] = new Proj4phpProjGestmerc('',$this);

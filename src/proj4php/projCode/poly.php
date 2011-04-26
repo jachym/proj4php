@@ -1,6 +1,6 @@
 <?php 
 /**
- * Author : Julien Moquet
+ * Author : Julien Moquet 
  * 
  * Inspired by Proj4php from Mike Adair madairATdmsolutions.ca
  *                      and Richard Greenwood rich@greenwoodma$p->com 
@@ -76,31 +76,31 @@ ALGORITHM REFERENCES
     Printing Office, Washington D.C., 1989.
 *******************************************************************************/
 
-class Proj4phpProjPoly  {
+class Proj4phpProjPoly  extends Proj4phpProj  {
 
 	/* Initialize the POLYCONIC projection
 	  ----------------------------------*/
-	public function init() {
+	function init() {
 		$temp;			/* temporary variable		*/
 		if ($this->lat0=0) $this->lat0=90;//$this->lat0 ca
 
-		/* Place parameters in static storage for common use
+		/* Place parameters in storage for common use
 		  -------------------------------------------------*/
 		$this->temp = $this->b / $this->a;
 		$this->es = 1.0 - pow($this->temp,2);// devait etre dans tmerc.js mais n y est pas donc je commente sinon retour de valeurs nulles 
 		$this->e = sqrt($this->es);
-		$this->e0 = Proj4php::$common.e0fn($this->es);
-		$this->e1 = Proj4php::$common.e1fn($this->es);
-		$this->e2 = Proj4php::$common.e2fn($this->es);
-		$this->e3 = Proj4php::$common.e3fn($this->es);
-		$this->ml0 = Proj4php::$common.mlfn($this->e0, $this->e1,$this->e2, $this->e3, $this->lat0);//si que des zeros le calcul ne se fait pas
+		$this->e0 = $this->proj4php->common.e0fn($this->es);
+		$this->e1 = $this->proj4php->common.e1fn($this->es);
+		$this->e2 = $this->proj4php->common.e2fn($this->es);
+		$this->e3 = $this->proj4php->common.e3fn($this->es);
+		$this->ml0 = $this->proj4php->common.mlfn($this->e0, $this->e1,$this->e2, $this->e3, $this->lat0);//si que des zeros le calcul ne se fait pas
 		//if (!$this->ml0) {$this->ml0=0;}
 	}
 
 
 	/* Polyconic forward equations--mapping lat,long to x,y
 	  ---------------------------------------------------*/
-	public function forward($p) {
+	function forward($p) {
 		$sinphi; $cosphi;	/* sin and cos value				*/
 		$al;				/* temporary values				*/
 		$c;				/* temporary values				*/
@@ -111,7 +111,7 @@ class Proj4phpProjPoly  {
 		$lon=$p->x;
 		$lat=$p->y;	
 
-		$con = Proj4php::$common->adjust_lon($lon - $this->long0);
+		$con = $this->proj4php->common->adjust_lon($lon - $this->long0);
 		if (abs($lat) <= .0000001) {
 			$x = $this->x0 + $this->a * $con;
 			$y = $this->y0 - $this->a * $this->ml0;
@@ -119,8 +119,8 @@ class Proj4phpProjPoly  {
 			$sinphi = sin($lat);
 			$cosphi = cos($lat);	   
 
-			$ml = Proj4php::$common.mlfn($this->e0, $this->e1, $this->e2, $this->e3, $lat);
-			$ms = Proj4php::$common.msfnz($this->e,$sinphi,$cosphi);
+			$ml = $this->proj4php->common.mlfn($this->e0, $this->e1, $this->e2, $this->e3, $lat);
+			$ms = $this->proj4php->common.msfnz($this->e,$sinphi,$cosphi);
 			$con = sinphi;
 			$x = $this->x0 + $this->a * $ms * sin($con)/$sinphi;
 			$y = $this->y0 + $this->a * ($ml - $this->ml0 + $ms * (1.0 - cos($con))/$sinphi);
@@ -134,7 +134,7 @@ class Proj4phpProjPoly  {
 
 	/* Inverse equations
 	-----------------*/
-	public function inverse($p) {
+	function inverse($p) {
 		$sin_phi; $cos_phi;	/* sin and cos value				*/
 		$al;					/* temporary values				*/
 		$b;					/* temporary values				*/
@@ -154,7 +154,7 @@ class Proj4phpProjPoly  {
 			$b = $al * $al + ($p->x/$this->a) * ($p->x/$this->a);
 			$iflg = phi4z($this->es,$this->e0,$this->e1,$this->e2,$this->e3,$this->al,$b,$c,$lat);
 			if ($iflg != 1) return(iflg);
-			$lon = Proj4php::$common->adjust_lon((Proj4php::$common->asinz($p->x * $ / $this->a) / sin($lat)) + $this->long0);
+			$lon = $this->proj4php->common->adjust_lon(($this->proj4php->common->asinz($p->x * $ / $this->a) / sin($lat)) + $this->long0);
 		}
 
 		$p->x=$lon;
@@ -164,5 +164,5 @@ class Proj4phpProjPoly  {
 };
 
 
-Proj4php::$proj['poly'] = new Proj4phpProjPoly();
+$this->proj['poly'] = new Proj4phpProjPoly('',$this);
 

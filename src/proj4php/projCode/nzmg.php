@@ -123,7 +123,7 @@ LICENSE
   Initialize New Zealand Map Grip projection
 */
 
-class Proj4phpProjNzmg  {
+class Proj4phpProjNzmg  extends Proj4phpProj  {
 
   /**
    * iterations: Number of iterations to refine inverse transform.
@@ -131,9 +131,9 @@ class Proj4phpProjNzmg  {
    *     1 -> m accuracy -- suitable for most mapping applications
    *     2 -> mm accuracy
    */
-  protected $iterations= 1,
+  $iterations= 1,
 
-  public function init() {
+  function init() {
     $this->A = array();
     $this->A[1]  = +0.6399175073;
     $this->A[2]  = -0.1358797613;
@@ -178,7 +178,7 @@ class Proj4phpProjNzmg  {
     New Zealand Map Grid Forward  - long/lat to x/y
     long/lat in radians
   */
-  public function forward($p) {
+  function forward($p) {
     $lon = $p->x;
     $lat = $p->y;
 
@@ -187,7 +187,7 @@ class Proj4phpProjNzmg  {
 
     // 1. Calculate d_phi and d_psi    ...                          // and d_lambda
     // For this algorithm, delta_latitude is in seconds of arc x 10-5, so we need to scale to those units. Longitude is radians.
-    $d_phi = $delta_lat / Proj4php::$common->SEC_TO_RAD * 1E-5;       $d_lambda = $delta_lon;
+    $d_phi = $delta_lat / $this->proj4php->common->SEC_TO_RAD * 1E-5;       $d_lambda = $delta_lon;
     $d_phi_n = 1;  // d_phi^0
 
     $d_psi = 0;
@@ -223,7 +223,7 @@ class Proj4phpProjNzmg  {
   /**
     New Zealand Map Grid Inverse  -  x/y to long/lat
   */
-  public function inverse($p) {
+  function inverse($p) {
 
     $x = $p->x;
     $y = $p->y;
@@ -285,7 +285,7 @@ class Proj4phpProjNzmg  {
 
     // 4. Calculate latitude and longitude
     // d_phi is calcuated in second of arc * 10^-5, so we need to scale back to radians. d_lambda is in radians.
-    $lat = $this->lat0 + ($d_phi * Proj4php::$common->SEC_TO_RAD * 1E5);
+    $lat = $this->lat0 + ($d_phi * $this->proj4php->common->SEC_TO_RAD * 1E5);
     $lon = $this->long0 +  $d_lambda;
 
     $p->x = $lon;
@@ -295,4 +295,4 @@ class Proj4phpProjNzmg  {
   }
 }
 
-Proj4php::$proj['nzmg'] = new Proj4phpProjNzmg();
+$this->proj['nzmg'] = new Proj4phpProjNzmg('',$this);

@@ -31,18 +31,18 @@ ALGORITHM REFERENCES
     Printing Office, Washington D.C., 1989.
 *******************************************************************************/
 
-//static double r_major = a;		   /* major axis 				*/
-//static double r_minor = b;		   /* minor axis 				*/
-//static double lon_center = long0;	   /* Center longitude (projection center) */
-//static double lat_origin =  lat0;	   /* center latitude			*/
-//static double e,es;		           /* eccentricity constants		*/
-//static double m1;		               /* small value m			*/
-//static double false_northing = y0;   /* y offset in meters			*/
-//static double false_easting = x0;	   /* x offset in meters			*/
+//double r_major = a;		   /* major axis 				*/
+//double r_minor = b;		   /* minor axis 				*/
+//double lon_center = long0;	   /* Center longitude (projection center) */
+//double lat_origin =  lat0;	   /* center latitude			*/
+//double e,es;		           /* eccentricity constants		*/
+//double m1;		               /* small value m			*/
+//double false_northing = y0;   /* y offset in meters			*/
+//double false_easting = x0;	   /* x offset in meters			*/
 //scale_fact = k0 
 
-class Proj4phpProjMerc  {
-  public function init() {
+class Proj4phpProjMerc  extends Proj4phpProj  {
+  function init() {
 	//?$this->temp = $this->r_minor / $this->r_major;
 	//$this->temp = $this->b / $this->a;
 	//$this->es = 1.0 - sqrt($this->temp);
@@ -53,7 +53,7 @@ class Proj4phpProjMerc  {
       if ($this->sphere) {
         $this->k0 = cos($this->lat_ts);
       } else {
-        $this->k0 = Proj4php::$common->msfnz($this->es, sin($this->lat_ts), cos($this->lat_ts));
+        $this->k0 = $this->proj4php->common->msfnz($this->es, sin($this->lat_ts), cos($this->lat_ts));
       }
     }
   }
@@ -61,31 +61,31 @@ class Proj4phpProjMerc  {
 /* Mercator forward equations--mapping lat,long to x,y
   --------------------------------------------------*/
 
-  public function forward($p) {	
+  function forward($p) {	
     //alert("ll2m coords : ".coords);
     $lon = $p->x;
     $lat = $p->y;
     // convert to radians
-    if ( lat*Proj4php::$common->R2D > 90.0 && 
-          lat*Proj4php::$common->R2D < -90.0 && 
-          lon*Proj4php::$common->R2D > 180.0 && 
-          lon*Proj4php::$common->R2D < -180.0) {
+    if ( lat*$this->proj4php->common->R2D > 90.0 && 
+          lat*$this->proj4php->common->R2D < -90.0 && 
+          lon*$this->proj4php->common->R2D > 180.0 && 
+          lon*$this->proj4php->common->R2D < -180.0) {
       Proj4php::reportError("merc:forward: llInputOutOfRange: ".$lon ." : " . $lat);
       return null;
     }
 
     $x;$y;
-    if(abs( abs($lat) - Proj4php::$common->HALF_PI)  <= Proj4php::$common->EPSLN) {
+    if(abs( abs($lat) - $this->proj4php->common->HALF_PI)  <= $this->proj4php->common->EPSLN) {
       Proj4php::reportError("merc:forward: ll2mAtPoles");
       return null;
     } else {
       if ($this->sphere) {
-        $x = $this->x0 + $this->a * $this->k0 * Proj4php::$common->adjust_lon($lon - $this->long0);
-        $y = $this->y0 + $this->a * $this->k0 * log(tan(Proj4php::$common.FORTPI + 0.5*lat));
+        $x = $this->x0 + $this->a * $this->k0 * $this->proj4php->common->adjust_lon($lon - $this->long0);
+        $y = $this->y0 + $this->a * $this->k0 * log(tan($this->proj4php->common.FORTPI + 0.5*lat));
       } else {
         $sinphi = sin(lat);
-        $ts = Proj4php::$common.tsfnz($this->e,$lat,$sinphi);
-        $x = $this->x0 + $this->a * $this->k0 * Proj4php::$common->adjust_lon($lon - $this->long0);
+        $ts = $this->proj4php->common.tsfnz($this->e,$lat,$sinphi);
+        $x = $this->x0 + $this->a * $this->k0 * $this->proj4php->common->adjust_lon($lon - $this->long0);
         $y = $this->y0 - $this->a * $this->k0 * log($ts);
       }
       $p->x = $x; 
@@ -97,23 +97,23 @@ class Proj4phpProjMerc  {
 
   /* Mercator inverse equations--mapping x,y to lat/long
   --------------------------------------------------*/
-  public function inverse($p) {	
+  function inverse($p) {	
 
     $x = $p->x - $this->x0;
     $y = $p->y - $this->y0;
     $lon;$lat;
 
     if ($this->sphere) {
-      $lat = Proj4php::$common->HALF_PI - 2.0 * atan(exp(-$y / $this->a * $this->k0));
+      $lat = $this->proj4php->common->HALF_PI - 2.0 * atan(exp(-$y / $this->a * $this->k0));
     } else {
       $ts = exp(-$y / ($this->a * $this->k0));
-      $lat = Proj4php::$common.phi2z($this->e,$ts);
+      $lat = $this->proj4php->common.phi2z($this->e,$ts);
       if($lat == -9999) {
         Proj4php::reportError("merc:inverse: lat = -9999");
         return null;
       }
     }
-    $lon = Proj4php::$common->adjust_lon($this->long0+ $x / ($this->a * $this->k0));
+    $lon = $this->proj4php->common->adjust_lon($this->long0+ $x / ($this->a * $this->k0));
 
     $p->x = $lon;
     $p->y = $lat;
@@ -121,6 +121,6 @@ class Proj4phpProjMerc  {
   }
 }
 
-Proj4php::$proj['merc'] = new Proj4phpProjMerc();
+$this->proj['merc'] = new Proj4phpProjMerc('',$this);
 
 

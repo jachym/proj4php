@@ -34,25 +34,25 @@ ALGORITHM REFERENCES
     Package", U.S. Geological Survey National Mapping Division, May 1982.
 *******************************************************************************/
 
-class Proj4phpProjSinu  {
+class Proj4phpProjSinu  extends Proj4phpProj  {
 
 	/* Initialize the Sinusoidal projection
 	  ------------------------------------*/
-	public function init() {
-		/* Place parameters in static storage for common use
+	function init() {
+		/* Place parameters in storage for common use
 		  -------------------------------------------------*/
 		$this->R = 6370997.0; //Radius of earth
 	}
 
 	/* Sinusoidal forward equations--mapping lat,long to x,y
 	-----------------------------------------------------*/
-	public function forward($p) {
+	function forward($p) {
 		$x;$y;$delta_lon;	
 		$lon=$p->x;
 		$lat=$p->y;	
 		/* Forward equations
 		-----------------*/
-		$delta_lon = Proj4php::$common->adjust_lon($lon - $this->long0);
+		$delta_lon = $this->proj4php->common->adjust_lon($lon - $this->long0);
 		$x = $this->R * delta_lon * cos($lat) + $this->x0;
 		$y = $this->R * lat + $this->y0;
 
@@ -61,7 +61,7 @@ class Proj4phpProjSinu  {
 		return $p;
 	}
 
-	public function inverse($p) {
+	function inverse($p) {
 		$lat;$temp;$lon;	
 
 		/* Inverse equations
@@ -69,13 +69,13 @@ class Proj4phpProjSinu  {
 		$p->x -= $this->x0;
 		$p->y -= $this->y0;
 		$lat = $p->y / $this->R;
-		if (abs($lat) > Proj4php::$common->HALF_PI) {
+		if (abs($lat) > $this->proj4php->common->HALF_PI) {
 		    Proj4php::reportError("sinu:Inv:DataError");
 		}
-		$temp = abs($lat) - Proj4php::$common->HALF_PI;
-		if (abs($temp) > Proj4php::$common->EPSLN) {
+		$temp = abs($lat) - $this->proj4php->common->HALF_PI;
+		if (abs($temp) > $this->proj4php->common->EPSLN) {
 			$temp = $this->long0+ $p->x / ($this->R *cos($lat));
-			$lon = Proj4php::$common->adjust_lon($temp);
+			$lon = $this->proj4php->common->adjust_lon($temp);
 		} else {
 			$lon = $this->long0;
 		}
@@ -87,4 +87,4 @@ class Proj4phpProjSinu  {
 };
 
 
-Proj4php::$proj['sinu'] = new Proj4phpProjSinu();
+$this->proj['sinu'] = new Proj4phpProjSinu('',$this);

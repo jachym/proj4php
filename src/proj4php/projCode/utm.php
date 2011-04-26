@@ -1,4 +1,4 @@
-<?php 
+ <?php
 /**
  * Author : Julien Moquet
  * 
@@ -32,15 +32,15 @@ ALGORITHM REFERENCES
 */
 
 class Proj4phpProjUtm  extends Proj4phpProjTmerc {
-  protected $dependsOn = 'tmerc';
+  $dependsOn = 'tmerc';
 
-  public function init() {
+  function init() {
     if (!$this->zone) {
       Proj4php::reportError("utm:init: zone must be specified for UTM");
       return;
     }
     $this->lat0 = 0.0;
-    $this->long0 = ((6 * abs($this->zone)) - 183) * Proj4php::$common.D2R;
+    $this->long0 = ((6 * abs($this->zone)) - 183) * $this->proj4php->common.D2R;
     $this->x0 = 500000.0;
     $this->y0 = $this->utmSouth ? 10000000.0 : 0.0;
     $this->k0 = 0.9996;
@@ -48,4 +48,4 @@ class Proj4phpProjUtm  extends Proj4phpProjTmerc {
 }
 
 
-Proj4php::$proj['utm'] = new Proj4phpProjUtm();
+$this->proj['utm'] = new Proj4phpProjUtm('',$this);

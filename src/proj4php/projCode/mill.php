@@ -36,25 +36,25 @@ ALGORITHM REFERENCES
     Package", U.S. Geological Survey National Mapping Division, May 1982.
 *******************************************************************************/
 
-class Proj4phpProjMill  {
+class Proj4phpProjMill  extends Proj4phpProj  {
 
 /* Initialize the Miller Cylindrical projection
   -------------------------------------------*/
-  public function init() {
+  function init() {
     //no-op
   }
 
 
   /* Miller Cylindrical forward equations--mapping lat,long to x,y
     ------------------------------------------------------------*/
-  public function forward($p) {
+  function forward($p) {
     $lon=$p->x;
     $lat=$p->y;
     /* Forward equations
       -----------------*/
-    $dlon = Proj4php::$common->adjust_lon($lon -$this->long0);
+    $dlon = $this->proj4php->common->adjust_lon($lon -$this->long0);
     $x = $this->x0 + $this->a * $dlon;
-    $y = $this->y0 + $this->a * log(tan((Proj4php::$common->PI / 4.0) + ($lat / 2.5))) * 1.25;
+    $y = $this->y0 + $this->a * log(tan(($this->proj4php->common->PI / 4.0) + ($lat / 2.5))) * 1.25;
 
     $p->x=$x;
     $p->y=$y;
@@ -63,12 +63,12 @@ class Proj4phpProjMill  {
 
   /* Miller Cylindrical inverse equations--mapping x,y to lat/long
     ------------------------------------------------------------*/
-  public function inverse($p) {
+  function inverse($p) {
     $p->x -= $this->x0;
     $p->y -= $this->y0;
 
-    $lon = Proj4php::$common->adjust_lon($this->long0 + $p->x /$this->a);
-    $lat = 2.5 * (atan(exp(0.8*$p->y/$this->a)) - Proj4php::$common->PI / 4.0);
+    $lon = $this->proj4php->common->adjust_lon($this->long0 + $p->x /$this->a);
+    $lat = 2.5 * (atan(exp(0.8*$p->y/$this->a)) - $this->proj4php->common->PI / 4.0);
 
     $p->x=$lon;
     $p->y=$lat;
@@ -78,4 +78,4 @@ class Proj4phpProjMill  {
 
 
 
-Proj4php::$proj['mill'] = new Proj4phpProjMill();
+$this->proj['mill'] = new Proj4phpProjMill('',$this);

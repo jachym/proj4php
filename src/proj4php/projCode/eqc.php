@@ -7,9 +7,9 @@
  * License: LGPL as per: http://www.gnu.org/copyleft/lesser.html 
  */
 /* similar to equi.js FIXME proj4 uses eqc */
-class Proj4phpProjEqc
+class Proj4phpProjEqc extends Proj4phpProj 
 {
-  public function init()
+  function init()
   {
 
       if(!$this->x0) $this->x0=0;
@@ -25,13 +25,13 @@ class Proj4phpProjEqc
 
     // forward equations--mapping lat,long to x,y
     // -----------------------------------------------------------------
-    public function forward($p) {
+    function forward($p) {
 
       $lon=$p->x;
       $lat=$p->y;
 
-      $dlon = Proj4php::$common->adjust_lon($lon - $this->long0);
-      $dlat = Proj4php::$common.adjust_lat($lat - $this->lat0 );
+      $dlon = $this->proj4php->common->adjust_lon($lon - $this->long0);
+      $dlat = $this->proj4php->common.adjust_lat($lat - $this->lat0 );
      $p->x= $this->x0 + ($this->a*$dlon*$this->rc);
      $p->y= $this->y0 + ($this->a*$dlat        );
       return $p;
@@ -39,16 +39,16 @@ class Proj4phpProjEqc
 
   // inverse equations--mapping x,y to lat/long
   // -----------------------------------------------------------------
-  public function inverse($p) {
+  function inverse($p) {
 
     $x=$p->x;
     $y=$p->y;
 
-   $p->x= Proj4php::$common->adjust_lon($this->long0 + (($x - $this->x0)/($this->a*$this->rc)));
-   $p->y= Proj4php::$common->adjust_lat($this->lat0  + (($y - $this->y0)/($this->a        )));
+   $p->x= $this->proj4php->common->adjust_lon($this->long0 + (($x - $this->x0)/($this->a*$this->rc)));
+   $p->y= $this->proj4php->common->adjust_lat($this->lat0  + (($y - $this->y0)/($this->a        )));
     return $p;
   }
 
 };
 
-Proj4php::$proj['eqc'] = new Proj4phpProjEqc();
+$this->proj['eqc'] = new Proj4phpProjEqc('',$this);

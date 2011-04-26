@@ -29,13 +29,13 @@ ALGORITHM REFERENCES
     Accessed: 12th November 2009
 ******************************************************************************/
 
-class Proj4phpProjGnom {
+class Proj4phpProjGnom  extends Proj4phpProj {
 
   /* Initialize the Gnomonic projection
     -------------------------------------*/
-  public function init($def) {
+  function init($def) {
 
-    /* Place parameters in static storage for common use
+    /* Place parameters in storage for common use
       -------------------------------------------------*/
     $this->sin_p14=sin($this->lat0);
     $this->cos_p14=cos($this->lat0);
@@ -47,7 +47,7 @@ class Proj4phpProjGnom {
 
   /* Gnomonic forward equations--mapping lat,long to x,y
     ---------------------------------------------------*/
-  public function forward($p) {
+  function forward($p) {
     $sinphi; $cosphi;	/* sin and cos value				*/
     $dlon;		/* delta longitude value			*/
     $coslon;		/* cos of longitude				*/
@@ -57,7 +57,7 @@ class Proj4phpProjGnom {
     $lat=$p->y;	
     /* Forward equations
       -----------------*/
-    $dlon = Proj4php::$common->adjust_lon($lon - $this->long0);
+    $dlon = $this->proj4php->common->adjust_lon($lon - $this->long0);
 
     $sinphi=sin($lat);
     $cosphi=cos($lat);	
@@ -65,7 +65,7 @@ class Proj4phpProjGnom {
     $coslon = cos($dlon);
     $g = $this->sin_p14 * $sinphi + $this->cos_p14 * $cosphi * $coslon;
     $ksp = 1.0;
-    if ((g > 0) || (abs(g) <= Proj4php::$common->EPSLN)) {
+    if ((g > 0) || (abs(g) <= $this->proj4php->common->EPSLN)) {
       $x = $this->x0 + $this->a * $ksp * $cosphi * sin($dlon) / $g;
       $y = $this->y0 + $this->a * $ksp * ($this->cos_p14 * $sinphi - $this->sin_p14 * $cosphi * $coslon) / $g;
     } else {
@@ -88,7 +88,7 @@ class Proj4phpProjGnom {
   }
 
 
-  public function inverse($p) {
+  function inverse($p) {
     $rh;		/* Rho */
     $z;		/* angle */
     $sinc; $cosc;
@@ -108,9 +108,9 @@ class Proj4phpProjGnom {
       $sinc = sin($c);
       $cosc = cos($c);
 
-      $lat = Proj4php::$common->asinz($cosc*$this->sin_p14 + ($p->y*$sinc*$this->cos_p14) / $rh);
+      $lat = $this->proj4php->common->asinz($cosc*$this->sin_p14 + ($p->y*$sinc*$this->cos_p14) / $rh);
       $lon = atan2($p->x*sinc, rh*$this->cos_p14*$cosc - $p->y*$this->sin_p14*$sinc);
-      $lon = Proj4php::$common->adjust_lon($this->long0+$lon);
+      $lon = $this->proj4php->common->adjust_lon($this->long0+$lon);
     } else {
       $lat = $this->phic0;
       $lon = 0.0;
@@ -123,4 +123,4 @@ class Proj4phpProjGnom {
 }
 
 
-Proj4php::$proj['gnom'] = new Proj4phpProjGnom();
+$this->proj['gnom'] = new Proj4phpProjGnom('',$this);

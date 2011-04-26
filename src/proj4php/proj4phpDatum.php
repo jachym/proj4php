@@ -1,4 +1,4 @@
-﻿<?php
+<?php 
 /**
  * Author : Julien Moquet
  * 
@@ -11,27 +11,29 @@
 */
  class proj4phpDatum
  {
-    public $datum_type;
+    var $datum_type;
+	var $proj4php;
  
-  public function __construct($proj) {
-    $this->datum_type = Proj4php::$common->PJD_WGS84;   //default setting
+  function proj4phpDatum($proj,$proj4php) {
+    $this->proj4php = $proj4php;
+    $this->datum_type = $this->proj4php->common->PJD_WGS84;   //default setting
     if ($proj->datumCode && $proj->datumCode == 'none') {
-      $this->datum_type = Proj4php::$common->PJD_NODATUM;
+      $this->datum_type = $this->proj4php->common->PJD_NODATUM;
     }
     if ($proj && isset($proj->datum_params)) {
       for ($i=0; $i<sizeof($proj->datum_params); $i++) {
-        $proj->datum_params[$i]=floatval($proj->datum_params[$i]);
+        $proj->datum_params[$i]= $proj->datum_params[$i]; // floatval($proj->datum_params[$i]); // test sans floatval
       }
       if ($proj->datum_params[0] != 0 || $proj->datum_params[1] != 0 || $proj->datum_params[2] != 0 ) {
-        $this->datum_type = Proj4php::$common->PJD_3PARAM;
+        $this->datum_type = $this->proj4php->common->PJD_3PARAM;
       }
       if (sizeof($proj->datum_params) > 3) {
         if ($proj->datum_params[3] != 0 || $proj->datum_params[4] != 0 ||
             $proj->datum_params[5] != 0 || $proj->datum_params[6] != 0 ) {
-          $this->datum_type = Proj4php::$common->PJD_7PARAM;
-          $proj->datum_params[3] *= Proj4php::$common->SEC_TO_RAD;
-          $proj->datum_params[4] *= Proj4php::$common->SEC_TO_RAD;
-          $proj->datum_params[5] *= Proj4php::$common->SEC_TO_RAD;
+          $this->datum_type = $this->proj4php->common->PJD_7PARAM;
+          $proj->datum_params[3] *= $this->proj4php->common->SEC_TO_RAD;
+          $proj->datum_params[4] *= $this->proj4php->common->SEC_TO_RAD;
+          $proj->datum_params[5] *= $this->proj4php->common->SEC_TO_RAD;
           $proj->datum_params[6] = ($proj->datum_params[6]/1000000.0) + 1.0;
         }
       }
@@ -48,18 +50,18 @@
   /****************************************************************/
   // cs_compare_datums()
   //   Returns 1 (TRUE) if the two datums match, otherwise 0 (FALSE).
-  public function compare_datums( $dest ) {
+  function compare_datums( $dest ) {
     if( $this->datum_type != $dest->datum_type ) {
       return false; // false, datums are not equal
     } else if( $this->a != $dest->a || abs($this->es-$dest->es) > 0.000000000050 ) {
       // the tolerence for es is to ensure that GRS80 and WGS84
       // are considered identical
       return false;
-    } else if( $this->datum_type == Proj4php::$common->PJD_3PARAM ) {
+    } else if( $this->datum_type == $this->proj4php->common->PJD_3PARAM ) {
       return ($this->datum_params[0] == $dest->datum_params[0]
               && $this->datum_params[1] == $dest->datum_params[1]
               && $this->datum_params[2] == $dest->datum_params[2]);
-    } else if( $this->datum_type == Proj4php::$common->PJD_7PARAM ) {
+    } else if( $this->datum_type == $this->proj4php->common->PJD_7PARAM ) {
       return ($this->datum_params[0] == $dest->datum_params[0]
               && $this->datum_params[1] == $dest->datum_params[1]
               && $this->datum_params[2] == $dest->datum_params[2]
@@ -67,7 +69,7 @@
               && $this->datum_params[4] == $dest->datum_params[4]
               && $this->datum_params[5] == $dest->datum_params[5]
               && $this->datum_params[6] == $dest->datum_params[6]);
-    } else if( $this->datum_type == Proj4php::$common->PJD_GRIDSHIFT ) {
+    } else if( $this->datum_type == $this->proj4php->common->PJD_GRIDSHIFT ) {
 	  throw(new Exception("Not implemented yet"));
       //return strcmp( pj_param($this->params,"snadgrids").s,
       //               pj_param($dest->params,"snadgrids").s ) == 0;
@@ -89,7 +91,7 @@
    *    Z         : Calculated Geocentric Z coordinate, in meters    (output)
    *
    */
-  public function geodetic_to_geocentric($p) {
+  function geodetic_to_geocentric($p) {
     $Longitude = $p->x;
     $Latitude = $p->y;
     $Height = isset($p->z) ? $p->z : 0;   //Z value not always supplied
@@ -108,17 +110,17 @@
     ** range as it may just be a rounding issue.  Also removed longitude
     ** test, it should be wrapped by cos() and sin().  NFW for PROJ.4, Sep/2001.
     */
-    if( $Latitude < -Proj4php::$common->HALF_PI && $Latitude > -1.001 * Proj4php::$common->HALF_PI ) {
-        $Latitude = -Proj4php::$common->HALF_PI;
-    } else if( $Latitude > Proj4php::$common->HALF_PI && $Latitude < 1.001 * Proj4php::$common->HALF_PI ) {
-        $Latitude = Proj4php::$common->HALF_PI;
-    } else if (($Latitude < -Proj4php::$common->HALF_PI) || ($Latitude > Proj4php::$common->HALF_PI)) {
+    if( $Latitude < -$this->proj4php->common->HALF_PI && $Latitude > -1.001 * $this->proj4php->common->HALF_PI ) {
+        $Latitude = -$this->proj4php->common->HALF_PI;
+    } else if( $Latitude > $this->proj4php->common->HALF_PI && $Latitude < 1.001 * $this->proj4php->common->HALF_PI ) {
+        $Latitude = $this->proj4php->common->HALF_PI;
+    } else if (($Latitude < -$this->proj4php->common->HALF_PI) || ($Latitude > $this->proj4php->common->HALF_PI)) {
       /* Latitude out of range */
       Proj4php::reportError('geocent:lat out of range:'.$Latitude);
       return null;
     }
 
-    if ($Longitude > Proj4php::$common->PI) $Longitude -= (2*Proj4php::$common->PI);
+    if ($Longitude > $this->proj4php->common->PI) $Longitude -= (2*$this->proj4php->common->PI);
     $Sin_Lat = sin($Latitude);
     $Cos_Lat = cos($Latitude);
     $Sin2_Lat = $Sin_Lat * $Sin_Lat;
@@ -134,7 +136,7 @@
   } // cs_geodetic_to_geocentric()
 
 
-  public function geocentric_to_geodetic($p) {
+  function geocentric_to_geodetic($p) {
 /* local defintions and variables */
 /* end-criterium of loop, accuracy of sin(Latitude) */
 $genau = 1.E-12;
@@ -177,7 +179,7 @@ $maxiter = 30;
 /*  if (X,Y,Z)=(0.,0.,0.) then Height becomes semi-minor axis
  *  of ellipsoid (=center of mass), Latitude becomes PI/2 */
         if ($RR/$this->a < $genau) {
-            $Latitude = Proj4php::$common->HALF_PI;
+            $Latitude = $this->proj4php->common->HALF_PI;
             $Height   = -$this->b;
             return;
         }
@@ -236,7 +238,7 @@ $maxiter = 30;
    * The method used here is derived from 'An Improved Algorithm for
    * Geocentric to Geodetic Coordinate Conversion', by Ralph Toms, Feb 1996
    */
-  public function geocentric_to_geodetic_noniter ($p) {
+  function geocentric_to_geodetic_noniter ($p) {
     $X = $p->x;
     $Y = $p->y;
     $Z = $p->z ? $p->z : 0;   //Z value not always supplied
@@ -272,11 +274,11 @@ $maxiter = 30;
     {
         if ($Y > 0)
         {
-            $Longitude = Proj4php::$common->HALF_PI;
+            $Longitude = $this->proj4php->common->HALF_PI;
         }
         else if (Y < 0)
         {
-            $Longitude = -Proj4php::$common->HALF_PI;
+            $Longitude = -$this->proj4php->common->HALF_PI;
         }
         else
         {
@@ -284,15 +286,15 @@ $maxiter = 30;
             $Longitude = 0.0;
             if ($Z > 0.0)
             {  /* north pole */
-                $Latitude = Proj4php::$common->HALF_PI;
+                $Latitude = $this->proj4php->common->HALF_PI;
             }
             else if (Z < 0.0)
             {  /* south pole */
-                $Latitude = -Proj4php::$common->HALF_PI;
+                $Latitude = -$this->proj4php->common->HALF_PI;
             }
             else
             {  /* center of earth */
-                $Latitude = Proj4php::$common->HALF_PI;
+                $Latitude = $this->proj4php->common->HALF_PI;
                 $Height = -$this->b;
                 return;
             }
@@ -300,7 +302,7 @@ $maxiter = 30;
     }
     $W2 = $X*$X + $Y*$Y;
     $W = sqrt($W2);
-    $T0 = $Z * Proj4php::$common->AD_C;
+    $T0 = $Z * $this->proj4php->common->AD_C;
     $S0 = sqrt($T0 * $T0 + $W2);
     $Sin_B0 = $T0 / $S0;
     $Cos_B0 = $W / $S0;
@@ -311,11 +313,11 @@ $maxiter = 30;
     $Sin_p1 = $T1 / $S1;
     $Cos_p1 = $Sum / $S1;
     $Rn = $this->a / sqrt(1.0 - $this->es * $Sin_p1 * $Sin_p1);
-    if ($Cos_p1 >= Proj4php::$common->COS_67P5)
+    if ($Cos_p1 >= $this->proj4php->common->COS_67P5)
     {
         $Height = $W / $Cos_p1 - $Rn;
     }
-    else if ($Cos_p1 <= -Proj4php::$common->COS_67P5)
+    else if ($Cos_p1 <= -$this->proj4php->common->COS_67P5)
     {
         $Height = $W / -$Cos_p1 - $Rn;
     }
@@ -337,9 +339,9 @@ $maxiter = 30;
   /****************************************************************/
   // pj_geocentic_to_wgs84( p )
   //  p = point to transform in geocentric coordinates (x,y,z)
-  public function geocentric_to_wgs84( $p ) {
+  function geocentric_to_wgs84( $p ) {
 
-    if( $this->datum_type == Proj4php::$common->PJD_3PARAM )
+    if( $this->datum_type == $this->proj4php->common->PJD_3PARAM )
     {
       // if( x[io] == HUGE_VAL )
       //    continue;
@@ -348,7 +350,7 @@ $maxiter = 30;
       $p->z += $this->datum_params[2];
 
     }
-    else if ($this->datum_type == Proj4php::$common->PJD_7PARAM)
+    else if ($this->datum_type == $this->proj4php->common->PJD_7PARAM)
     {
       $Dx_BF =$this->datum_params[0];
       $Dy_BF =$this->datum_params[1];
@@ -372,9 +374,9 @@ $maxiter = 30;
   // pj_geocentic_from_wgs84()
   //  coordinate system definition,
   //  point to transform in geocentric coordinates (x,y,z)
-  public function geocentric_from_wgs84( $p ) {
+  function geocentric_from_wgs84( $p ) {
 
-    if( $this->datum_type == Proj4php::$common->PJD_3PARAM )
+    if( $this->datum_type == $this->proj4php->common->PJD_3PARAM )
     {
       //if( x[io] == HUGE_VAL )
       //    continue;
@@ -383,7 +385,7 @@ $maxiter = 30;
       $p->z -= $this->datum_params[2];
 
     }
-    else if ($this->datum_type == Proj4php::$common->PJD_7PARAM)
+    else if ($this->datum_type == $this->proj4php->common->PJD_7PARAM)
     {
       $Dx_BF =$this->datum_params[0];
       $Dy_BF =$this->datum_params[1];

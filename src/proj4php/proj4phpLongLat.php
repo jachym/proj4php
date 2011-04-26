@@ -1,4 +1,4 @@
-<?php
+<?php 
 /**
  * Author : Julien Moquet
  * 
@@ -9,14 +9,14 @@
  
  class proj4phpLongLat
  {
-	public function init()
+	function init()
 	{
 	}
-	public function forward($pt)
+	function forward($pt)
 	{
 		return $pt;
 	}
-	public function inverse($pt)
+	function inverse($pt)
 	{
 		return $pt;
 	}

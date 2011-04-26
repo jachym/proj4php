@@ -1,5 +1,5 @@
 <?php 
-/**
+/** 
  * Author : Julien Moquet
  * 
  * Inspired by Proj4php from Mike Adair madairATdmsolutions.ca
@@ -29,9 +29,9 @@ ALGORITHM REFERENCES
     U.S. Geological Survey Professional Paper 1453 , United State Government
     Printing Office, Washington D.C., 1989.
 *******************************************************************************/
-class Proj4phpProjEqui
+class Proj4phpProjEqui extends Proj4phpProj 
 {
-  public function init() {
+  function init() {
     if(!$this->x0) $this->x0=0;
     if(!$this->y0) $this->y0=0;
     if(!$this->lat0) $this->lat0=0;
@@ -43,12 +43,12 @@ class Proj4phpProjEqui
 
 /* Equirectangular forward equations--mapping lat,long to x,y
   ---------------------------------------------------------*/
-  public function forward($p) {
+  function forward($p) {
 
     $lon=$p->x;				
     $lat=$p->y;			
 
-    $dlon = Proj4php::$common->adjust_lon($lon - $this->long0);
+    $dlon = $this->proj4php->common->adjust_lon($lon - $this->long0);
     $x = $this->x0 +$this-> a * $dlon *cos($this->lat0);
     $y = $this->y0 + $this->a * $lat;
 
@@ -63,19 +63,19 @@ class Proj4phpProjEqui
 
 /* Equirectangular inverse equations--mapping x,y to lat/long
   ---------------------------------------------------------*/
-  public function inverse($p) {
+  function inverse($p) {
 
     $p->x -= $this->x0;
     $p->y -= $this->y0;
     $lat = $p->y /$this-> a;
 
-    if ( abs($lat) > Proj4php::$common->HALF_PI) {
+    if ( abs($lat) > $this->proj4php->common->HALF_PI) {
         Proj4php::reportError("equi:Inv:DataError");
     }
-    $lon = Proj4php::$common->adjust_lon($this->long0 + $p->x / ($this->a * cos($this->lat0)));
+    $lon = $this->proj4php->common->adjust_lon($this->long0 + $p->x / ($this->a * cos($this->lat0)));
     $p->x=$lon;
     $p->y=$lat;
   }//equiInv()
 }
 
-Proj4php::$proj['equi'] = new Proj4phpProjEqui();
+$this->proj['equi'] = new Proj4phpProjEqui('',$this);

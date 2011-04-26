@@ -4,8 +4,8 @@ include_once("../proj4php/proj4php.php");
 
 $proj4 = new Proj4php();
 
-$projL93 = new Proj4phpProj('EPSG:2154');
-$projWGS84 = new Proj4phpProj('EPSG:4326');
+$projL93 = new Proj4phpProj('EPSG:2154',$proj4);
+$projWGS84 = new Proj4phpProj('EPSG:4326',$proj4);
 
 // GPS
 // latitude        longitude

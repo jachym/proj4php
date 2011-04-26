@@ -1,4 +1,4 @@
-<?php
+<?php 
 /**
  * Author : Julien Moquet
  * 
@@ -9,9 +9,9 @@
  
  class proj4phpPoint {
  
-	public $x;
-	public $y;
-	public $z;
+	var $x;
+	var $y;
+	var $z;
  
     /**
      * Constructor: Proj4js.Point
@@ -22,7 +22,7 @@
      * - y {float} the second component
      * - z {float} the third component, optional.
      */
-    public function __construct($x,$y,$z=null) {
+    function proj4phpPoint($x,$y,$z=null) {
       if (is_object($x)) {
         $this->x = $x[0];
         $this->y = $x[1];
@@ -48,7 +48,7 @@
      * Return:
      * {Proj4js}.Point the cloned point.
      */
-    public function _clone() {
+    function _clone() {
       return new Proj4phpPoint($this->x, $this->y, $this->z);
     }
 
@@ -60,7 +60,7 @@
      * {String} String representation of Proj4js.Point object. 
      *           (ex. <i>"x=5,y=42"</i>)
      */
-    public function toString() {
+    function toString() {
         return "x=" . $this->x . ",y=" . $this->y;
     }
 
@@ -72,7 +72,7 @@
      * {String} Shortened String representation of Proj4js.Point object. 
      *         (ex. <i>"5, 42"</i>)
      */
-    public function toShortString() {
+    function toShortString() {
         return $this->x . ", " . $this->y;
     }
  

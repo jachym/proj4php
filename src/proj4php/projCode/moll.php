@@ -32,33 +32,33 @@ ALGORITHM REFERENCES
     State Government Printing Office, Washington D.C., 1987.
 *******************************************************************************/
 
-class Proj4phpProjMoll  {
+class Proj4phpProjMoll  extends Proj4phpProj  {
 
   /* Initialize the Mollweide projection
     ------------------------------------*/
-  public function init(){
+  function init(){
     //no-op
   }
 
   /* Mollweide forward equations--mapping lat,long to x,y
     ----------------------------------------------------*/
-  public function forward($p) {
+  function forward($p) {
 
     /* Forward equations
       -----------------*/
     $lon=$p->x;
     $lat=$p->y;
 
-    $delta_lon = Proj4php::$common->adjust_lon($lon - $this->long0);
+    $delta_lon = $this->proj4php->common->adjust_lon($lon - $this->long0);
     $theta = $lat;
-    $con = Proj4php::$common->PI * sin($lat);
+    $con = $this->proj4php->common->PI * sin($lat);
 
     /* Iterate using the Newton-Raphson method to find theta
       -----------------------------------------------------*/
     for ($i=0;true;i++) {
        $delta_theta = -($theta + sin($theta) - $con)/ (1.0 + cos($theta));
        $theta += $delta_theta;
-       if (abs($delta_theta) < Proj4php::$common->EPSLN) break;
+       if (abs($delta_theta) < $this->proj4php->common->EPSLN) break;
        if (i >= 50) {
           Proj4php::reportError("moll:Fwd:IterationError");
          //return(241);
@@ -69,7 +69,7 @@ class Proj4phpProjMoll  {
     /* If the latitude is 90 deg, force the x coordinate to be "0 . false easting"
        this is done here because of precision problems with "cos(theta)"
        --------------------------------------------------------------------------*/
-    if (Proj4php::$common->PI/2 - abs($lat) < Proj4php::$common->EPSLN) $delta_lon =0;
+    if ($this->proj4php->common->PI/2 - abs($lat) < $this->proj4php->common->EPSLN) $delta_lon =0;
     $x = 0.900316316158 * $this->a * $delta_lon * cos($theta) + $this->x0;
     $y = 1.4142135623731 * $this->a * sin($theta) + $this->y0;
 
@@ -78,7 +78,7 @@ class Proj4phpProjMoll  {
     return $p;
   }
 
-  public function inverse($p){
+  function inverse($p){
     $theta;
     $arg;
 
@@ -93,10 +93,10 @@ class Proj4phpProjMoll  {
        -------------------------------------------------------------------*/
     if(abs($arg) > 0.999999999999) $arg=0.999999999999;
     $theta =asin($arg);
-    $lon = Proj4php::$common->adjust_lon($this->long0 + ($p->x / (0.900316316158 * $this->a * cos($theta))));
-    if($lon < (-Proj4php::$common->PI)) $lon= -Proj4php::$common->PI;
-    if($lon > Proj4php::$common->PI) $lon= Proj4php::$common->PI;
-    $arg = (2.0 * $theta + sin(2.0 * $theta)) / Proj4php::$common->PI;
+    $lon = $this->proj4php->common->adjust_lon($this->long0 + ($p->x / (0.900316316158 * $this->a * cos($theta))));
+    if($lon < (-$this->proj4php->common->PI)) $lon= -$this->proj4php->common->PI;
+    if($lon > $this->proj4php->common->PI) $lon= $this->proj4php->common->PI;
+    $arg = (2.0 * $theta + sin(2.0 * $theta)) / $this->proj4php->common->PI;
     if(abs($arg) > 1.0) $arg=1.0;
     $lat = asin($arg);
     //return(OK);
@@ -107,4 +107,4 @@ class Proj4phpProjMoll  {
   }
 };
 
-Proj4php::$proj['moll'] = new Proj4phpProjMoll();
+$this->proj['moll'] = new Proj4phpProjMoll('',$this);
