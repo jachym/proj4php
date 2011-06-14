@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * Author : Julien Moquet
  * 
@@ -76,9 +76,11 @@ class Proj4phpProj
   * (but not always) EPSG codes.
   */
   function Proj4phpProj($srsCode,$proj4php) {
-	  $this->proj4php = $proj4php;
+	  $this->proj4php = &$proj4php;
       $this->srsCodeInput = $srsCode;
-      
+  
+      if ($srsCode=='') return;
+  
       //check to see if $this is a WKT string
       if ((strpos($srsCode,'GEOGCS') !== false) ||
           (strpos($srsCode,'GEOCCS') !== false) ||
@@ -215,18 +217,20 @@ class Proj4phpProj
  * An exception occurs if the projection is not found.
  */
     function loadProjCode($projName) {
-	
       if (array_key_exists($projName,$this->proj4php->proj)) {
         $this->initTransforms();
         return;
       }
       //the filename for the projection code
       $filename = dirname(__FILE__).'/projCode/'.$projName. '.php';
-	  
 	  if ($this->proj4php->loadScript($filename))
+	  {
 		$this->loadProjCodeSuccess($projName);
+	  }
 	  else
+	  {
 		$this->loadProjCodeFailure($projName);
+	  }
     }
 
  /**

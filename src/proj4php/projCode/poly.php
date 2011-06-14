@@ -1,6 +1,6 @@
-<?php 
+<?php
 /**
- * Author : Julien Moquet 
+ * Author : Julien Moquet
  * 
  * Inspired by Proj4php from Mike Adair madairATdmsolutions.ca
  *                      and Richard Greenwood rich@greenwoodma$p->com 

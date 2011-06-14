@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * Author : Julien Moquet
  * 
@@ -385,9 +385,13 @@ class Proj4php
 	function loadScript($filename, $onload=null, $onfail=null, $loadCheck=null)
 	{
 		if (file_exists($filename))
+		{
 			require_once($filename);
+		}
 		else
+		{
 			return false;
+		}
 		return true;
     }
 	

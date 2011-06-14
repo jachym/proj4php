@@ -1,5 +1,5 @@
-<?php 
-/** 
+<?php
+/**
  * Author : Julien Moquet
  * 
  * Inspired by Proj4php from Mike Adair madairATdmsolutions.ca

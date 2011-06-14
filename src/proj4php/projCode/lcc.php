@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * Author : Julien Moquet
  * 
@@ -149,7 +149,7 @@ class Proj4phpProjLcc  extends Proj4phpProj {
     $p->y = $lat;
     return $p;
   }
-};
+}
 
 
 $this->proj['lcc'] = new Proj4phpProjLcc('',$this);
