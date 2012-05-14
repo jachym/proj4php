@@ -40,6 +40,11 @@ class Proj4phpProj
   var $projName= null;
   
   /**
+   * Property: projection
+   * The projection object for $this projection. */
+  public $projection = null;
+  
+  /**
    * Property: units
    * The units of the projection.  Values include 'm' and 'degrees'
    */
@@ -277,9 +282,10 @@ class Proj4phpProj
  */
     function initTransforms()
 	{
+	  $this->projection = clone($this->proj4php->proj[$this->projName]);
 	  foreach($this as $key=>$value)
 	  {
-			$this->proj4php->proj[$this->projName]->$key = $value;
+			$this->projection->$key = $value;
 	  }
 	  
       $this->init();
@@ -288,17 +294,17 @@ class Proj4phpProj
 
 	function init()
 	{
-		$this->proj4php->proj[$this->projName]->init();
+		$this->projection->init();
 	}
 	
 	function forward($pt)
 	{
-		return $this->proj4php->proj[$this->projName]->forward($pt);
+		return $this->projection->forward($pt);
 	}
 	
 	function inverse($pt)
 	{
-		return $this->proj4php->proj[$this->projName]->inverse($pt);
+		return $this->projection->inverse($pt);
 	}
   
   
