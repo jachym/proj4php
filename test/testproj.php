@@ -1,5 +1,5 @@
 <?php
-include_once("../proj4php/proj4php.php");
+include_once("../src/proj4php/proj4php.php");
 
 
 $proj4 = new Proj4php();
